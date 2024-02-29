@@ -17,7 +17,7 @@ const main=async()=>{
 
   const data= new productModel({name:"laptop", price:200, quantity:500, quality:"good"})
   const result =await data.save()
-  console.log(result)
+
 
 }
 
