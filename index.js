@@ -1,58 +1,49 @@
 
-const mongoose = require('mongoose');
+const express = require('express');
+const productModel = require('./Model/product')   // model import
+require('./config/dbConnection')   // for db connection
+const app = express()
 
-mongoose.connect('mongodb://127.0.0.1:27017/e-comm')
+app.use(express.json())   // for converting json object = json.stringfy()
 
 
-const productSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
-  quantity: Number,
-  quality: String,
-  category: String,
-  status:Boolean
+// for post  api 
+app.post('/create', async (req, res) => {
+
+    const data = new productModel(req.body)
+    const result = await data.save()
+
+    res.send(result)
 })
 
-const create = async () => {
+// for get api
 
-  const productModel = mongoose.model("product", productSchema)
-
-  const data = new productModel(
-    //{ name: "kartik", price: 400, quantity: 900, quality: "good", category: "wire" },
-   // { name: "Nilesh", price: 600, quantity: 1900, quality: "avrage", category: "chemical" },
-    //{ name: "shirt", price: 200, quantity: 600, quality: "A++", category: "cloth" },
-    { name: "saree", price: 100, quantity: 700, quality: "A", category: "cloth" }
-  
-  )
-  console.log(data,)
-  const result = await data.save()
+app.get("/list", async(req, res)=>{
+ const data =  await productModel.find();
+    res.send(data)
+})
 
 
-}
+app.delete('/delete/:_id', async(req, res)=>{
+       console.log(req.params)
+    const data = await productModel.findOneAndDelete(req.params)
 
-//create()
+     res.send(  data)
+})
 
-const updateDB = async () => {
-  const productModel = mongoose.model('product', productSchema);
-  const data = await productModel.updateMany({ category: "wire" }, { $set: { name: "kartik", price: 3000, quantity: 90, quality: "best", category: "wire" } })
-  console.log(data, "record updates")
-}
-//updateDB()
+ app.delete('/deleteMany', async (req,res)=>{
+     const {ids} =req.body
+     const data = await productModel.deleteMany({_id:{$in:ids }})
+     res.send( req.body)
+ } )
 
-const deleteDB = async () => {
-  const productModel = mongoose.model("products", productSchema)
-  const data = await productModel.deleteMany({  })
-  console.log(data, "deleted")
-}
+app.put('/update/:_id', async (req,res)=>{
+   const data = await productModel.updateOne(req.params, {$set :req.body})
+      res.send(data)
 
-//deleteDB()
-
-const findData=async ()=>{
-  const productModel =mongoose.model("products", productSchema);
- // const data = await productModel.findOne({name:"Nilesh"})
- const data = await productModel.findById("65e1eae284c617611b14b013")
-  console.log(data)
-}
+})
 
 
-findData()
+
+app.listen(2345)
+
