@@ -1,7 +1,8 @@
 
 const express = require('express');
 const productModel = require('./Model/product')   // model import
-require('./config/dbConnection')   // for db connection
+require('./config/dbConnection') ;  // for db connection
+const multer = require('multer');
 const app = express()
 
 app.use(express.json())   // for converting json object = json.stringfy()
@@ -18,30 +19,73 @@ app.post('/create', async (req, res) => {
 
 // for get api
 
-app.get("/list", async(req, res)=>{
- const data =  await productModel.find();
+app.get("/list", async (req, res) => {
+    const data = await productModel.find();
     res.send(data)
 })
 
 
-app.delete('/delete/:_id', async(req, res)=>{
-       console.log(req.params)
+
+//delete api
+app.delete('/delete/:_id', async (req, res) => {
+    console.log(req.params)
     const data = await productModel.findOneAndDelete(req.params)
 
-     res.send(  data)
+    res.send(data)
 })
 
- app.delete('/deleteMany', async (req,res)=>{
-     const {ids} =req.body
-     const data = await productModel.deleteMany({_id:{$in:ids }})
-     res.send( req.body)
- } )
+// multiple delete
+app.delete('/deleteMany', async (req, res) => {
+    const { ids } = req.body
+    const data = await productModel.deleteMany({ _id: { $in: ids } })
+    res.send(req.body)
+})
 
-app.put('/update/:_id', async (req,res)=>{
-   const data = await productModel.updateOne(req.params, {$set :req.body})
-      res.send(data)
+
+//put api
+app.put('/update/:_id', async (req, res) => {
+    const data = await productModel.updateOne(req.params, { $set: req.body })
+    res.send(data)
 
 })
+
+
+//search api 
+app.get('/search/:key', async (req, res) => {
+    console.log(req.params.key)
+    const data = await productModel.find({
+        "$or": [
+            { name: { $regex: req.params.key, $options: 'i' } },
+            { age: parseInt(req.params.key) },
+            { brand: { $regex: req.params.key, $options: 'i' } },
+            { model: { $regex: req.params.key, $options: 'i' } }
+        ]
+    })
+    res.send(data)
+})
+
+
+ // file uploade 
+
+ // middleware to uploade function
+
+ const upload = multer({
+  storage :multer.diskStorage({
+    destination :function(req, file , cb){
+        cb(null , 'uploadFile')
+    },
+    filename:function(req, filename, cb){
+        cb(null, filename.fieldname + '-' + Date.now() + '.jpg')
+    }
+  })
+ }).array("image", 10)
+
+ app.post('/upload', upload,async (req, res) =>{
+  console.log(req.files)
+      res.send(req.files)
+ })
+    
+
 
 
 
