@@ -3,7 +3,9 @@ const express = require('express');
 const productModel = require('./Model/product')   // model import
 require('./config/dbConnection') ;  // for db connection
 const multer = require('multer');
+const os = require('os')
 const app = express()
+
 
 app.use(express.json())   // for converting json object = json.stringfy()
 
@@ -84,10 +86,14 @@ app.get('/search/:key', async (req, res) => {
   console.log(req.files)
       res.send(req.files)
  })
-    
-
-
-
-
+  
+ 
+ //os module  = this is related with operating ralated module
+console.log(os.arch(), "Architecture")
+console.log(os.freemem()/(1024*1024*1024) , "free memory  ram")
+console.log(os.totalmem()/(1024*1024*1024), "total memery ram")
+console.log(os.hostname() , "hostname");
+console.log(os.platform() , "platform");
+console.log(os.userInfo())
 app.listen(2345)
 
