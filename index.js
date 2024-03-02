@@ -1,9 +1,10 @@
 
 const express = require('express');
 const productModel = require('./Model/product')   // model import
-require('./config/dbConnection') ;  // for db connection
+require('./config/dbConnection');  // for db connection
 const multer = require('multer');
-const os = require('os')
+const os = require('os')  // os module for pc  information
+const EventEmiter = require("events")
 const app = express()
 
 
@@ -67,33 +68,53 @@ app.get('/search/:key', async (req, res) => {
 })
 
 
- // file uploade 
+// file uploade 
 
- // middleware to uploade function
+// middleware to uploade function
 
- const upload = multer({
-  storage :multer.diskStorage({
-    destination :function(req, file , cb){
-        cb(null , 'uploadFile')
-    },
-    filename:function(req, filename, cb){
-        cb(null, filename.fieldname + '-' + Date.now() + '.jpg')
-    }
-  })
- }).array("image", 10)
+const upload = multer({
+    storage: multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, 'uploadFile')
+        },
+        filename: function (req, filename, cb) {
+            cb(null, filename.fieldname + '-' + Date.now() + '.jpg')
+        }
+    })
+}).array("image", 10)
 
- app.post('/upload', upload,async (req, res) =>{
-  console.log(req.files)
-      res.send(req.files)
- })
-  
- 
- //os module  = this is related with operating ralated module
+app.post('/upload', upload, async (req, res) => {
+    console.log(req.files)
+    res.send(req.files)
+})
+
+
+//os module  = this is related with operating ralated module
 console.log(os.arch(), "Architecture")
-console.log(os.freemem()/(1024*1024*1024) , "free memory  ram")
-console.log(os.totalmem()/(1024*1024*1024), "total memery ram")
-console.log(os.hostname() , "hostname");
-console.log(os.platform() , "platform");
+console.log(os.freemem() / (1024 * 1024 * 1024), "free memory  ram")
+console.log(os.totalmem() / (1024 * 1024 * 1024), "total memery ram")
+console.log(os.hostname(), "hostname");
+console.log(os.platform(), "platform");
 console.log(os.userInfo())
+
+
+///event emiter  to handle event 
+const event =new EventEmiter()
+let x=0
+event.on("apicall", ()=>{
+console.log("api call " , x++)
+})
+app.get('/ev1', (req, res) => {
+    event.emit("apicall")
+    res.send("api ev1 called")
+})
+app.get('/ev2', (req, res) => {
+    event.emit("apicall")
+    res.send("api ev2 called")
+})
+app.get('/ev3', (req, res) => {
+    event.emit("apicall")
+    res.send("api ev3 called")
+})
 app.listen(2345)
 
